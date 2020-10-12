@@ -3,23 +3,32 @@
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QScreen>
+
+#include <cassert>
 
 namespace hal
 {
-    NotificationManager::NotificationManager(QObject* parent) : QObject(parent)
+    NotificationManager::NotificationManager(QObject* parent) : QObject(parent),
+        m_width_offset(20),
+        m_height_offset(20),
+        m_spacing(10),
+        m_timeout(15000)
     {
-        m_width_offset  = 20;
-        m_height_offset = 20;
+        m_timer.setSingleShot(true);
 
-        m_spacing = 10;
+        QObject::connect(&m_timer, &QTimer::timeout, this, &NotificationManager::handle_timeout);
     }
 
     void NotificationManager::remove(Notification* n)
     {
-        if (m_list.removeOne(n))
+        assert(n);
+        assert(m_notifications.contains(n));
+
+        if (m_notifications.removeOne(n))
         {
             n->hide();
-            n->deleteLater();
+            delete n;
         }
         rearrange_Notifications();
     }
@@ -27,26 +36,49 @@ namespace hal
     void NotificationManager::debug_add_Notification()
     {
         Notification* n = new Notification(nullptr);
-        m_list.append(n);
+        m_notifications.append(n);
         rearrange_Notifications();
+        n->fade_in();
+        QApplication::beep();
+
+        if (m_timeout)
+        {
+            if (m_timer.isActive())
+            {
+                // INCORRECT IF TIMEOUT VALUE GETS CHANGED WHILE NOTIFICATIONS ARE ACTIVE BUT HONESTLY WHO CARES
+                m_timeouts.append(m_timeout - m_timer.remainingTime());
+            }
+            else
+            {
+                m_timer.setInterval(m_timeout);
+                m_timer.start();
+            }
+        }
+    }
+
+    void NotificationManager::handle_timeout()
+    {
+        remove(m_notifications.first());
+
+        if (!m_timeouts.isEmpty())
+        {
+            m_timer.setInterval(m_timeouts.first());
+            m_timeouts.removeFirst();
+            m_timer.start();
+        }
     }
 
     void NotificationManager::rearrange_Notifications()
     {
-        //QRect rec = QApplication::desktop()->availableGeometry();
-        QRect rec        = QApplication::desktop()->screenGeometry();
-        m_desktop_width  = rec.width();
-        m_desktop_height = rec.height();
+        QRect rect = QApplication::primaryScreen()->availableGeometry();
 
         int y = m_height_offset;
 
-        for (auto& element : m_list)
+        for (auto& element : m_notifications)
         {
             y += element->height();
-            element->move(m_desktop_width - m_width_offset - element->width(), m_desktop_height - y);
+            element->move(rect.width() - m_width_offset - element->width() + rect.x(), rect.height() - y + rect.y());
             y += m_spacing;
-            element->show();
-            element->fade_in();
         }
     }
 }

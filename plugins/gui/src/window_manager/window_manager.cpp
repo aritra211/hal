@@ -1,6 +1,7 @@
 #include "gui/window_manager/window_manager.h"
 
 #include "gui/dialogs/warning_dialog.h"
+#include "gui/gui_globals.h"
 #include "gui/overlay/dialog_overlay.h"
 #include "gui/overlay/overlay.h"
 #include "gui/plugin_management/plugin_schedule_widget.h"
@@ -193,7 +194,8 @@ namespace hal
 
     void WindowManager::handle_action_run_schedule()
     {
-
+        // DEBUG CODE
+        g_notification_manager->debug_add_Notification();
     }
 
     void WindowManager::handle_action_content()

@@ -27,7 +27,7 @@
 
 namespace hal
 {
-    class NotificationManagerQssAdapter : public QWidget
+    class NotificationManagerQssAdapter final : public QWidget
     {
         Q_OBJECT
         Q_PROPERTY(int x_offset READ x_offset WRITE set_x_offset)

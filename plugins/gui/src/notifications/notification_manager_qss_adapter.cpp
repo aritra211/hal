@@ -4,13 +4,11 @@
 
 namespace hal
 {
-    NotificationManagerQssAdapter::NotificationManagerQssAdapter(QWidget* parent) : QWidget(parent)
+    NotificationManagerQssAdapter::NotificationManagerQssAdapter(QWidget* parent) : QWidget(parent),
+        m_x_offset(20),
+        m_y_offset(20),
+        m_spacing(10)
     {
-        //DEFAULT VALUES
-        m_x_offset = 20;
-        m_y_offset = 20;
-        m_spacing  = 10;
-
         repolish();
     }
 

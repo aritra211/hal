@@ -87,7 +87,7 @@ namespace hal
         delete g_selection_relay;
         delete g_settings_relay;
         delete g_notification_manager;
-        //    delete g_window_manager;
+        delete g_window_manager;
     }
 
     static void m_cleanup(int sig)
@@ -156,10 +156,10 @@ namespace hal
         QSettings tempsettings_to_read_from(QString::fromStdString((utils::get_user_config_directory() / "guisettings.ini").string()), QSettings::IniFormat);
         QString stylesheet_to_open = ":/style/darcula";    //default style
 
-        if (tempsettings_to_read_from.value("main_style/theme", "") == "" || tempsettings_to_read_from.value("main_style/theme", "") == "darcula")
+        /*if (tempsettings_to_read_from.value("main_style/theme", "") == "" || tempsettings_to_read_from.value("main_style/theme", "") == "darcula")
             stylesheet_to_open = ":/style/darcula";
         else if (tempsettings_to_read_from.value("main_style/theme", "") == "sunny")
-            stylesheet_to_open = ":/style/sunny";
+            stylesheet_to_open = ":/style/sunny";*/
 
         QFile stylesheet(stylesheet_to_open);
         stylesheet.open(QFile::ReadOnly);
@@ -182,7 +182,7 @@ namespace hal
         g_file_status_manager   = new FileStatusManager();
         g_graph_context_manager = new GraphContextManager();
 
-        //g_window_manager       = new WindowManager();
+        g_window_manager       = new WindowManager();
         g_notification_manager = new NotificationManager();
 
         g_thread_pool = new ThreadPool();

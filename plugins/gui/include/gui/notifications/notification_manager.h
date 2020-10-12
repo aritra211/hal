@@ -25,6 +25,7 @@
 
 #include <QList>
 #include <QObject>
+#include <QTimer>
 
 namespace hal
 {
@@ -43,18 +44,22 @@ namespace hal
 
     public Q_SLOTS:
         void debug_add_Notification();
+        void handle_timeout();
 
     private:
         void rearrange_Notifications();
-
-        int m_desktop_width;
-        int m_desktop_height;
 
         int m_width_offset;
         int m_height_offset;
 
         int m_spacing;
 
-        QList<Notification*> m_list;
+        int m_timeout;
+
+        QList<Notification*> m_notifications;
+
+        QTimer m_timer;
+
+        QList<int> m_timeouts;
     };
 }

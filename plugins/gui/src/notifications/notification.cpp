@@ -53,7 +53,6 @@ namespace hal
     void Notification::fade_in()
     {
         show();
-        QApplication::beep();
         m_animation->start();
     }
 
