@@ -35,7 +35,7 @@ namespace hal
         Q_PROPERTY(qreal opacity READ get_opacity WRITE set_opacity)
 
     public:
-        Notification(QWidget* parent = 0);
+        Notification(QWidget* parent = nullptr);
 
         qreal get_opacity();
         void set_opacity(qreal opacity);

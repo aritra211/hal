@@ -6,6 +6,7 @@
 #include <QScreen>
 
 #include <cassert>
+#include <chrono>
 
 namespace hal
 {
@@ -15,57 +16,66 @@ namespace hal
         m_spacing(10),
         m_timeout(15000)
     {
-        m_timer.setSingleShot(true);
-
         QObject::connect(&m_timer, &QTimer::timeout, this, &NotificationManager::handle_timeout);
+
+        m_timer.setInterval(100);
     }
 
     void NotificationManager::remove(Notification* n)
     {
         assert(n);
-        assert(m_notifications.contains(n));
+        //assert(m_list.contains(n));
 
-        if (m_notifications.removeOne(n))
+        for (int i = 0; i < m_list.size(); ++i)
         {
-            n->hide();
-            delete n;
+            if (m_list.at(i).first == n)
+            {
+                m_list.removeAt(i);
+
+                if (m_list.isEmpty())
+                    m_timer.stop();
+
+                n->hide();
+                delete n;
+
+                rearrange_Notifications();
+                break;
+            }
         }
-        rearrange_Notifications();
     }
 
     void NotificationManager::debug_add_Notification()
     {
+        if (m_timeout)
+            if (m_list.isEmpty())
+                m_timer.start();
+
         Notification* n = new Notification(nullptr);
-        m_notifications.append(n);
+        std::chrono::system_clock::time_point t = std::chrono::system_clock::now() + std::chrono::milliseconds(m_timeout);
+
+        m_list.append(QPair<Notification*, std::chrono::system_clock::time_point>(n, t));
+
         rearrange_Notifications();
         n->fade_in();
         QApplication::beep();
-
-        if (m_timeout)
-        {
-            if (m_timer.isActive())
-            {
-                // INCORRECT IF TIMEOUT VALUE GETS CHANGED WHILE NOTIFICATIONS ARE ACTIVE BUT HONESTLY WHO CARES
-                m_timeouts.append(m_timeout - m_timer.remainingTime());
-            }
-            else
-            {
-                m_timer.setInterval(m_timeout);
-                m_timer.start();
-            }
-        }
     }
 
     void NotificationManager::handle_timeout()
     {
-        remove(m_notifications.first());
+        std::chrono::system_clock::time_point t = std::chrono::system_clock::now();
 
-        if (!m_timeouts.isEmpty())
+        // INEFFICIENT BUT SIMPLE
+
+        int i = 0;
+
+        for (; i < m_list.size(); ++i)
         {
-            m_timer.setInterval(m_timeouts.first());
-            m_timeouts.removeFirst();
-            m_timer.start();
+            if (t < m_list.at(i).second)
+                break;
         }
+
+        for (; i > 0; --i)
+            remove(m_list.first().first);
     }
 
     void NotificationManager::rearrange_Notifications()
@@ -74,10 +84,12 @@ namespace hal
 
         int y = m_height_offset;
 
-        for (auto& element : m_notifications)
+        for (const QPair<Notification*, std::chrono::system_clock::time_point>& pair : m_list)
         {
-            y += element->height();
-            element->move(rect.width() - m_width_offset - element->width() + rect.x(), rect.height() - y + rect.y());
+            Notification* n = pair.first;
+
+            y += n->height();
+            n->move(rect.width() - m_width_offset - n->width() + rect.x(), rect.height() - y + rect.y());
             y += m_spacing;
         }
     }

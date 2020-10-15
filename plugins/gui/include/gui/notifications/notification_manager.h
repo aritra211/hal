@@ -26,6 +26,7 @@
 #include <QList>
 #include <QObject>
 #include <QTimer>
+#include <QPair>
 
 namespace hal
 {
@@ -56,10 +57,8 @@ namespace hal
 
         int m_timeout;
 
-        QList<Notification*> m_notifications;
+        QList<QPair<Notification*, std::chrono::system_clock::time_point>> m_list;
 
         QTimer m_timer;
-
-        QList<int> m_timeouts;
     };
 }
