@@ -119,7 +119,7 @@ namespace hal
 
     void Window::closeEvent(QCloseEvent* event)
     {
-        g_window_manager->handle_window_close_request(this);
         event->ignore();
+        g_window_manager->handle_window_close_request(this);
     }
 }

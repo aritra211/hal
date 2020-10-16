@@ -26,8 +26,6 @@
 #include "gui/dialogs/dialog.h"
 #include "gui/overlay/overlay.h"
 
-class QVBoxLayout;
-
 namespace hal
 {
     class DialogOverlay : public Overlay
@@ -46,7 +44,6 @@ namespace hal
         void position_dialog();
 
     private:
-        QVBoxLayout* m_layout;
         Dialog* m_dialog;
     };
 }

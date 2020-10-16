@@ -14,7 +14,6 @@
 
 #include <QAction>
 #include <QShortcut>
-#include <QDebug>
 
 #include <cassert>
 
@@ -90,23 +89,25 @@ namespace hal
     void WindowManager::remove_window(Window* window)
     {
         assert(window);
+        assert(m_windows.contains(window));
 
-        if (m_windows.removeOne(window))
+        m_windows.removeOne(window);
+
+        if (window == m_main_window)
         {
-            if (window == m_main_window)
-            {
-                if (!m_windows.empty())
-                    set_main_window(m_windows[0]);
-                else
-                    m_main_window = nullptr;
-            }
-            window->deleteLater();
+            if (m_windows.empty())
+                m_main_window = nullptr;
+            else
+                set_main_window(m_windows.at(0));
         }
+
+        window->deleteLater();
     }
 
     void WindowManager::set_main_window(Window* window)
     {
         assert(window);
+        assert(m_windows.contains(window));
 
         if (m_main_window)
             m_main_window->show_toolbar_extension(); // USE SETTING HERE
@@ -116,7 +117,7 @@ namespace hal
         m_main_window->hide_toolbar_extension();
     }
 
-    void WindowManager::lock_all()
+    void WindowManager::lock_windows()
     {
         for (Window*& window : m_windows)
         {
@@ -129,23 +130,66 @@ namespace hal
         }
     }
 
-    void WindowManager::unlock_all()
+    void WindowManager::unlock_windows()
     {
         for (Window*& window : m_windows)
             window->unlock();
     }
 
-    void WindowManager::handle_window_close_request(Window* window)
+    void WindowManager::queue_dialog(Dialog* dialog)
     {
-        Q_UNUSED(window);
-        if (m_static_windows)
+        assert(dialog);
+
+        if (m_dialogs.isEmpty())
         {
-            // ASK FOR CONFIRMATION / FORWARD TO WINDOW MANAGER WIDGET
+            for (Window*& window : m_windows)
+            {
+                DialogOverlay* overlay = new DialogOverlay();
+
+                if (window == m_main_window)
+                {
+                    overlay->set_dialog(dialog);
+                    dialog->fade_in();
+                }
+
+                window->lock(overlay);
+            }
+        }
+
+        m_dialogs.append(dialog);
+    }
+
+    void WindowManager::delete_dialog(Dialog* dialog)
+    {
+        assert(dialog);
+        assert(m_dialogs.contains(dialog));
+
+        if (dialog != m_dialogs.first())
+        {
+            m_dialogs.removeOne(dialog);
         }
         else
         {
-            // STORE CONTENT AND CLOSE WINDOW
+            m_dialogs.removeFirst();
+
+            if (m_dialogs.isEmpty())
+            {
+                for (Window*& window : m_windows)
+                    window->unlock();
+            }
+            else
+            {
+
+            }
         }
+
+        delete dialog;
+    }
+
+    void WindowManager::handle_window_close_request(Window* window)
+    {
+        // DEBUG
+        remove_window(window);
     }
 
     void WindowManager::repolish()
@@ -167,19 +211,17 @@ namespace hal
 
     void WindowManager::handle_overlay_clicked()
     {
-        unlock_all();
+        unlock_windows();
     }
 
     void WindowManager::handle_action_open()
     {
-        qDebug() << "handle action open called";
-        lock_all();
+        lock_windows();
     }
 
     void WindowManager::handle_action_close()
     {
-        qDebug() << "handle action close called";
-        unlock_all();
+        unlock_windows();
     }
 
     void WindowManager::handle_action_save()

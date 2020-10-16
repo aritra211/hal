@@ -23,13 +23,14 @@
 
 #pragma once
 
+#include <QList>
 #include <QObject>
-#include <QVector>
 
 class QAction;
 
 namespace hal
 {
+    class Dialog;
     class MainSettingsWidget;
     class PluginScheduleWidget;
     class WelcomeScreen;
@@ -47,10 +48,14 @@ namespace hal
 
         void add_window();
         void remove_window(Window* window);
+
         void set_main_window(Window* window);
 
-        void lock_all();
-        void unlock_all();
+        void lock_windows();
+        void unlock_windows();
+
+        void queue_dialog(Dialog* dialog);
+        void delete_dialog(Dialog* dialog);
 
         void save_layout(const QString& name);
         void restore_layout(const QString& name);
@@ -74,13 +79,9 @@ namespace hal
 
     private:
         Window* m_main_window;
-        QVector<Window*> m_windows;
+        QList<Window*> m_windows;
 
         WindowToolbar* m_toolbar;
-
-        bool m_static_windows;
-        bool m_shared_minimize;
-        bool m_switch_main_on_focus;
 
         QAction* m_action_open_file;
         QAction* m_action_close_file;
@@ -91,8 +92,12 @@ namespace hal
         QAction* m_action_settings;
         QAction* m_action_about;
 
+        QList<Dialog*> m_dialogs;
+
         WelcomeScreen* m_welcome_screen;
         PluginScheduleWidget* m_plugin_schedule_widget;
         MainSettingsWidget* m_main_settings_widget;
+
+        bool m_switch_main_on_focus;
     };
 }

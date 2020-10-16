@@ -2,12 +2,9 @@
 
 #include "gui/dialogs/dialog.h"
 
-#include <QVBoxLayout>
-
 namespace hal
 {
     DialogOverlay::DialogOverlay(QWidget* parent) : Overlay(parent),
-        //m_layout(new QVBoxLayout(this)),
         m_dialog(nullptr)
     {
     }
@@ -22,19 +19,10 @@ namespace hal
 
         m_dialog = dialog;
 
-        dialog->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        //m_layout->addWidget(dialog, Qt::AlignCenter);
-        //m_layout->setAlignment(dialog, Qt::AlignCenter);
-
         dialog->setParent(this);
+        dialog->show();
 
-        m_dialog->show();
-
-        // OLD
-        //    m_widget->setParent(this);
-        //    m_widget->resize(m_widget->sizeHint());
-
-        connect(m_dialog, &Dialog::offset_changed, this, &DialogOverlay::position_dialog);
+        connect(dialog, &Dialog::offset_changed, this, &DialogOverlay::position_dialog);
     }
 
     void DialogOverlay::resizeEvent(QResizeEvent* event)
