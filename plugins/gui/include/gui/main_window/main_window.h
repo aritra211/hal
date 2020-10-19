@@ -24,19 +24,20 @@
 #pragma once
 
 #include "gui/content_layout_area/content_layout_area.h"
-#include "hal_core/utilities/program_options.h"
 #include "gui/action/action.h"
 #include "gui/plugin_manager/plugin_manager_widget.h"
 #include "gui/plugin_manager/plugin_model.h"
 #include "gui/settings/main_settings_widget.h"
 #include "gui/splitter/splitter.h"
+
+#include "hal_core/utilities/program_options.h"
+
 #include <QLayout>
 #include <QMenuBar>
 #include <QObject>
 #include <QSplitter>
 #include <QStackedWidget>
 #include <QToolBar>
-#include "hal_core/utilities/program_options.h"
 
 namespace hal
 {
@@ -128,7 +129,6 @@ namespace hal
 
     public Q_SLOTS:
         void on_action_quit_triggered();
-        void on_action_close_document_triggered();
         void run_plugin_triggered(const QString& name);
         void toggle_schedule();
         void toggle_settings();
@@ -138,10 +138,14 @@ namespace hal
         void handle_action_open();
         void handle_file_opened(const QString& file_name);
         void handle_save_triggered();
-        void handle_action_closed();
+        void handle_action_close_file();
+
+    private Q_SLOTS:
+        void closeEvent(QCloseEvent* event) override;
 
     private:
-        void closeEvent(QCloseEvent* event);
+        bool try_to_close_file(); // HACKY IMPLEMENTATION
+
         void restore_state();
         void save_state();
 

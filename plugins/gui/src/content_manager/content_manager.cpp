@@ -19,34 +19,31 @@
 #include "gui/selection_details_widget/selection_details_widget.h"
 #include "gui/gui_globals.h"
 #include "gui/main_window/main_window.h"
-#include "hal_core/netlist/netlist.h"
-#include "hal_core/netlist/persistent/netlist_serializer.h"
 #include "gui/vhdl_editor/vhdl_editor.h"
 
-#include <QGraphicsScene>
-#include <QGraphicsView>
-#include <QOpenGLWidget>
+#include "hal_core/netlist/netlist.h"
+#include "hal_core/netlist/persistent/netlist_serializer.h"
 
 namespace hal
 {
-    ContentManager::ContentManager(MainWindow* parent) : QObject(parent), m_MainWindow(parent)
+    ContentManager::ContentManager(MainWindow* parent) : QObject(parent), m_main_window(parent)
     {
         // has to be created this early in order to receive deserialization by the core signals
         m_python_widget = new PythonEditor();
 
         connect(FileManager::get_instance(), &FileManager::file_opened, this, &ContentManager::handle_open_document);
-        connect(FileManager::get_instance(), &FileManager::file_closed, this, &ContentManager::handle_close_document);
-        connect(FileManager::get_instance(), &FileManager::file_changed, this, &ContentManager::handle_filsystem_doc_changed);
     }
 
     ContentManager::~ContentManager()
     {
     }
 
-    void ContentManager::hack_delete_content()
+    void ContentManager::close_content()
     {
-        for (auto content : m_content)
+        for (ContentWidget* content : m_content)
             delete content;
+
+        m_content.clear();
     }
 
     PythonEditor* ContentManager::get_python_editor_widget()
@@ -59,9 +56,9 @@ namespace hal
         return m_graph_tab_wid;
     }
 
-    SelectionDetailsWidget* ContentManager::getSelectionDetailsWidget()
+    SelectionDetailsWidget* ContentManager::get_selection_details_widget()
     {
-        return mSelectionDetailsWidget;
+        return m_selection_details_widget;
     }
 
     ContextManagerWidget* ContentManager::get_context_manager_widget()
@@ -74,14 +71,14 @@ namespace hal
         m_graph_tab_wid = new GraphTabWidget(nullptr);
         //    VhdlEditor* code_edit = new VhdlEditor();
         //    m_graph_tab_wid->addTab(code_edit, "Source");
-        m_MainWindow->add_content(m_graph_tab_wid, 2, content_anchor::center);
+        m_main_window->add_content(m_graph_tab_wid, 2, content_anchor::center);
 
         ModuleWidget* m = new ModuleWidget();
-        m_MainWindow->add_content(m, 0, content_anchor::left);
+        m_main_window->add_content(m, 0, content_anchor::left);
         m->open();
 
         m_context_manager_wid = new ContextManagerWidget(m_graph_tab_wid);
-        m_MainWindow->add_content(m_context_manager_wid, 1, content_anchor::left);
+        m_main_window->add_content(m_context_manager_wid, 1, content_anchor::left);
         m_context_manager_wid->open();
 
         //we should probably document somewhere why we need this timer and why we have some sort of racing condition(?) here?
@@ -102,18 +99,18 @@ namespace hal
         //new_context->add({g_netlist->get_top_module()->get_id()}, {});
         //m_context_manager_wid->select_view_context(new_context);
 
-        mSelectionDetailsWidget = new SelectionDetailsWidget();
-        m_MainWindow->add_content(mSelectionDetailsWidget, 0, content_anchor::bottom);
+        m_selection_details_widget = new SelectionDetailsWidget();
+        m_main_window->add_content(m_selection_details_widget, 0, content_anchor::bottom);
 
         LoggerWidget* logger_widget = new LoggerWidget();
-        m_MainWindow->add_content(logger_widget, 1, content_anchor::bottom);
+        m_main_window->add_content(logger_widget, 1, content_anchor::bottom);
 
-        mSelectionDetailsWidget->open();
+        m_selection_details_widget->open();
         logger_widget->open();
 
         //m_content.append(code_edit);
         //m_content.append(navigation);
-        m_content.append(mSelectionDetailsWidget);
+        m_content.append(m_selection_details_widget);
         m_content.append(logger_widget);
 
         //-------------------------Test Buttons---------------------------
@@ -145,43 +142,14 @@ namespace hal
 
         //    m_MainWindow->add_content(plugin_widget, content_anchor::bottom);
 
-        connect(model, &PluginModel::run_plugin, m_MainWindow, &MainWindow::run_plugin_triggered);
+        connect(model, &PluginModel::run_plugin, m_main_window, &MainWindow::run_plugin_triggered);
 
-        m_window_title = "HAL - " + QString::fromStdString(std::filesystem::path(file_name.toStdString()).stem().string());
-        m_MainWindow->setWindowTitle(m_window_title);
-
-        m_MainWindow->add_content(m_python_widget, 3, content_anchor::right);
+        m_main_window->add_content(m_python_widget, 3, content_anchor::right);
         //m_python_widget->open();
 
         PythonConsoleWidget* PythonConsole = new PythonConsoleWidget();
-        m_MainWindow->add_content(PythonConsole, 5, content_anchor::bottom);
+        m_main_window->add_content(PythonConsole, 5, content_anchor::bottom);
         PythonConsole->open();
-        m_NetlistWatcher = new NetlistWatcher(this);
-    }
-
-    void ContentManager::handle_close_document()
-    {
-        //(if possible) store state first, then remove all subwindows from main window
-        m_window_title = "HAL";
-        m_MainWindow->setWindowTitle(m_window_title);
-        m_MainWindow->on_action_close_document_triggered();
-        //delete all windows here
-        for (auto content : m_content)
-        {
-            m_content.removeOne(content);
-            delete content;
-        }
-
-        FileManager::get_instance()->close_file();
-    }
-
-    void ContentManager::handle_filsystem_doc_changed(const QString& file_name)
-    {
-        Q_UNUSED(file_name)
-    }
-
-    void ContentManager::handle_save_triggered()
-    {
-        Q_EMIT save_triggered();
+        m_netlist_watcher = new NetlistWatcher(this);
     }
 }

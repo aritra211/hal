@@ -37,7 +37,7 @@ namespace hal
 
     GraphLayouter::GraphLayouter(const GraphContext* const context, QObject* parent) : QObject(parent), m_scene(new GraphicsScene(this)), m_context(context), m_done(false)
     {
-        SelectionDetailsWidget* details = g_content_manager->getSelectionDetailsWidget();
+        SelectionDetailsWidget* details = g_content_manager->get_selection_details_widget();
         if (details) connect(details, &SelectionDetailsWidget::triggerHighlight, m_scene, &GraphicsScene::handleHighlight);
     }
 

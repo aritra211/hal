@@ -170,7 +170,7 @@ namespace hal
         m_menu_bar->addAction(m_menu_help->menuAction());
         m_menu_file->addAction(m_action_new);
         m_menu_file->addAction(m_action_open);
-        //m_menu_file->addAction(m_action_close);
+        m_menu_file->addAction(m_action_close);
         m_menu_file->addAction(m_action_save);
         m_menu_edit->addAction(m_action_settings);
         m_menu_help->addAction(m_action_about);
@@ -219,22 +219,15 @@ namespace hal
         connect(m_settings, &MainSettingsWidget::close, this, &MainWindow::close_settings);
         connect(m_action_save, &Action::triggered, this, &MainWindow::handle_save_triggered);
         //debug
-        connect(m_action_close, &Action::triggered, this, &MainWindow::handle_action_closed);
+        connect(m_action_close, &Action::triggered, this, &MainWindow::handle_action_close_file);
 
         connect(m_action_run_schedule, &Action::triggered, PluginScheduleManager::get_instance(), &PluginScheduleManager::run_schedule);
-
-        connect(this, &MainWindow::save_triggered, g_content_manager, &ContentManager::handle_save_triggered);
 
         restore_state();
 
         //    PluginManagerWidget* widget = new PluginManagerWidget(nullptr);
         //    widget->set_plugin_model(m_plugin_model);
         //    widget->show();
-
-        //setGraphicsEffect(new OverlayEffect());
-
-        //ReminderOverlay* o = new ReminderOverlay(this);
-        //Q_UNUSED(o)
     }
 
     QString MainWindow::hal_icon_path() const
@@ -429,11 +422,6 @@ namespace hal
             m_stacked_widget->setCurrentWidget(m_schedule_widget);
     }
 
-    void MainWindow::on_action_close_document_triggered()
-    {
-        //m_layout_area->remove_content();
-    }
-
     void MainWindow::toggle_settings()
     {
         if (m_stacked_widget->currentWidget() == m_settings)
@@ -526,12 +514,13 @@ namespace hal
     void MainWindow::handle_file_opened(const QString& file_name)
     {
         Q_UNUSED(file_name)
+
         if (m_stacked_widget->currentWidget() == m_welcome_screen)
-        {
             m_stacked_widget->setCurrentWidget(m_layout_area);
-            m_welcome_screen->close();
-        }
+
         g_python_context->update_netlist();
+
+        setWindowTitle("HAL - " + QString::fromStdString(std::filesystem::path(file_name.toStdString()).stem().string()));
     }
 
     void MainWindow::handle_save_triggered()
@@ -567,8 +556,10 @@ namespace hal
         }
     }
 
-    void MainWindow::handle_action_closed()
+    void MainWindow::handle_action_close_file()
     {
+        if (FileManager::get_instance()->file_open())
+            try_to_close_file();
     }
 
     void MainWindow::on_action_quit_triggered()
@@ -578,7 +569,23 @@ namespace hal
 
     void MainWindow::closeEvent(QCloseEvent* event)
     {
-        //check for unsaved changes and show confirmation dialog
+        if (FileManager::get_instance()->file_open())
+        {
+            if (try_to_close_file())
+                event->accept();
+            else
+            {
+                event->ignore();
+                return;
+            }
+        }
+
+        save_state();
+        qApp->quit();
+    }
+
+    bool MainWindow::try_to_close_file()
+    {
         if (g_file_status_manager->modified_files_existing())
         {
             QMessageBox msgBox;
@@ -607,19 +614,17 @@ namespace hal
             msgBox.exec();
 
             if (msgBox.clickedButton() == cancelButton)
-            {
-                event->ignore();
-                return;
-            }
+                return false;
         }
 
+        g_content_manager->close_content();
         FileManager::get_instance()->close_file();
 
-        save_state();
-        event->accept();
-        // hack, remove later
-        g_content_manager->hack_delete_content();
-        qApp->quit();
+        setWindowTitle("HAL");
+
+        m_stacked_widget->setCurrentWidget(m_welcome_screen);
+
+        return true;
     }
 
     void MainWindow::restore_state()
@@ -629,7 +634,6 @@ namespace hal
         QRect rect = QApplication::desktop()->screenGeometry();
         QSize size = g_settings_manager->get("MainWindow/size", QSize(rect.width(), rect.height())).toSize();
         resize(size);
-        //restore state of all subwindows
         m_layout_area->init_splitter_size(size);
     }
 
@@ -637,7 +641,6 @@ namespace hal
     {
         g_settings_manager->update("MainWindow/position", pos());
         g_settings_manager->update("MainWindow/size", size());
-        //save state of all subwindows and everything else that might need to be restored on the next program start
         g_settings_manager->sync();
     }
 

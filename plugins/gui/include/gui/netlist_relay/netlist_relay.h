@@ -107,7 +107,7 @@ namespace hal
         // GUI
         void module_color_changed(Module* m) const;
 
-    private Q_SLOTS:
+    public Q_SLOTS:
         void debug_handle_file_opened();
         void debug_handle_file_closed();
 
@@ -122,6 +122,6 @@ namespace hal
         QMap<u32, QString> m_gate_aliases;
         QMap<u32, QString> m_net_aliases;
 
-        ModuleModel* m_ModuleModel;
+        ModuleModel* m_module_model;
     };
 }

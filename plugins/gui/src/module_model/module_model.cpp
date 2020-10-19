@@ -4,14 +4,13 @@
 
 #include "gui/gui_globals.h"
 #include "gui/gui_utils/graphics.h"
-//#include "gui/ModuleModel/ModuleItem.h"
 
 #include "hal_core/netlist/gate.h"
 #include "hal_core/netlist/net.h"
 
 namespace hal
 {
-    ModuleModel::ModuleModel(QObject* parent) : QAbstractItemModel(parent), m_top_ModuleItem(nullptr)
+    ModuleModel::ModuleModel(QObject* parent) : QAbstractItemModel(parent), m_top_module_item(nullptr)
     {
     }
 
@@ -22,8 +21,8 @@ namespace hal
 
         if (!parent.isValid())
         {
-            if (row == 0 && column == 0 && m_top_ModuleItem)
-                return createIndex(0, 0, m_top_ModuleItem);
+            if (row == 0 && column == 0 && m_top_module_item)
+                return createIndex(0, 0, m_top_module_item);
             else
                 return QModelIndex();
         }
@@ -62,7 +61,7 @@ namespace hal
 
         ModuleItem* item = get_item(index);
 
-        if (item == m_top_ModuleItem)
+        if (item == m_top_module_item)
             return QModelIndex();
 
         ModuleItem* parent_item = item->parent();
@@ -172,7 +171,7 @@ namespace hal
         QVector<int> row_numbers;
         const ModuleItem* current_item = item;
 
-        while (current_item != m_top_ModuleItem)
+        while (current_item != m_top_module_item)
         {
             row_numbers.append(current_item->row());
             current_item = current_item->const_parent();
@@ -190,23 +189,12 @@ namespace hal
     {
         ModuleItem* item = new ModuleItem(1);
 
-        m_ModuleItems.insert(1, item);
+        m_module_items.insert(1, item);
 
         beginInsertRows(index(0, 0, QModelIndex()), 0, 0);
-        m_top_ModuleItem = item;
+        m_top_module_item = item;
         endInsertRows();
 
-        // This is broken because it can attempt to insert a child before its parent
-        // which will cause an assertion failure and then crash
-
-        // std::set<Module*> s = g_netlist->get_modules();
-        // s.erase(g_netlist->get_top_module());
-        // for (Module* m : s)
-        //     add_module(m->get_id(), m->get_parent_module()->get_id());
-
-        // This works
-
-        // recursively insert modules
         Module* m = g_netlist->get_top_module();
         add_recursively(m->get_submodules());
     }
@@ -215,9 +203,9 @@ namespace hal
     {
         beginResetModel();
 
-        m_top_ModuleItem = nullptr;
+        m_top_module_item = nullptr;
 
-        for (ModuleItem* m : m_ModuleItems)
+        for (ModuleItem* m : m_module_items)
             delete m;
 
         endResetModel();
@@ -227,14 +215,14 @@ namespace hal
     {
         assert(g_netlist->get_module_by_id(id));
         assert(g_netlist->get_module_by_id(parent_module));
-        assert(!m_ModuleItems.contains(id));
-        assert(m_ModuleItems.contains(parent_module));
+        assert(!m_module_items.contains(id));
+        assert(m_module_items.contains(parent_module));
 
         ModuleItem* item   = new ModuleItem(id);
-        ModuleItem* parent = m_ModuleItems.value(parent_module);
+        ModuleItem* parent = m_module_items.value(parent_module);
 
         item->set_parent(parent);
-        m_ModuleItems.insert(id, item);
+        m_module_items.insert(id, item);
 
         QModelIndex index = get_index(parent);
 
@@ -259,9 +247,9 @@ namespace hal
     {
         assert(id != 1);
         assert(g_netlist->get_module_by_id(id));
-        assert(m_ModuleItems.contains(id));
+        assert(m_module_items.contains(id));
 
-        ModuleItem* item   = m_ModuleItems.value(id);
+        ModuleItem* item   = m_module_items.value(id);
         ModuleItem* parent = item->parent();
         assert(item);
         assert(parent);
@@ -276,16 +264,16 @@ namespace hal
         m_is_modifying = false;
         endRemoveRows();
 
-        m_ModuleItems.remove(id);
+        m_module_items.remove(id);
         delete item;
     }
 
     void ModuleModel::update_module(const u32 id)    // SPLIT ???
     {
         assert(g_netlist->get_module_by_id(id));
-        assert(m_ModuleItems.contains(id));
+        assert(m_module_items.contains(id));
 
-        ModuleItem* item = m_ModuleItems.value(id);
+        ModuleItem* item = m_module_items.value(id);
         assert(item);
 
         item->set_name(QString::fromStdString(g_netlist->get_module_by_id(id)->get_name()));    // REMOVE & ADD AGAIN
@@ -297,7 +285,7 @@ namespace hal
 
     ModuleItem* ModuleModel::get_item(const u32 module_id) const
     {
-        return m_ModuleItems.value(module_id);
+        return m_module_items.value(module_id);
     }
 
     bool ModuleModel::is_modifying()

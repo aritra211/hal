@@ -21,7 +21,7 @@
 
 namespace hal
 {
-    NetlistRelay::NetlistRelay(QObject* parent) : QObject(parent), m_ModuleModel(new ModuleModel(this))
+    NetlistRelay::NetlistRelay(QObject* parent) : QObject(parent), m_module_model(new ModuleModel(this))
     {
         connect(FileManager::get_instance(), &FileManager::file_opened, this, &NetlistRelay::debug_handle_file_opened);    // DEBUG LINE
         register_callbacks();
@@ -63,7 +63,7 @@ namespace hal
 
     ModuleModel* NetlistRelay::get_ModuleModel()
     {
-        return m_ModuleModel;
+        return m_module_model;
     }
 
     void NetlistRelay::debug_change_module_name(const u32 id)
@@ -107,7 +107,7 @@ namespace hal
             return;
 
         m_module_colors.insert(id, color);
-        m_ModuleModel->update_module(id);
+        m_module_model->update_module(id);
 
         // Since color is our Overlay over the netlist data, no event is
         // automatically fired. We need to take care of that ourselves here.
@@ -314,7 +314,7 @@ namespace hal
             {
                 //< no associated_data
 
-                m_ModuleModel->update_module(object->get_id());
+                m_module_model->update_module(object->get_id());
 
                 g_graph_context_manager->handle_module_name_changed(object);
 
@@ -332,7 +332,7 @@ namespace hal
             {
                 //< associated_data = id of added module
 
-                m_ModuleModel->add_module(associated_data, object->get_id());
+                m_module_model->add_module(associated_data, object->get_id());
 
                 g_graph_context_manager->handle_module_submodule_added(object, associated_data);
 
@@ -343,7 +343,7 @@ namespace hal
             {
                 //< associated_data = id of removed module
 
-                m_ModuleModel->remove_module(associated_data);
+                m_module_model->remove_module(associated_data);
 
                 g_graph_context_manager->handle_module_submodule_removed(object, associated_data);
 
@@ -527,12 +527,12 @@ namespace hal
 
         m_module_colors.insert(1, QColor(96, 110, 112));
 
-        m_ModuleModel->init();
+        m_module_model->init();
     }
 
     void NetlistRelay::debug_handle_file_closed()
     {
-        m_ModuleModel->clear();
+        m_module_model->clear();
         m_module_colors.clear();
     }
 }

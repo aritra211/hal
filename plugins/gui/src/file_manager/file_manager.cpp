@@ -298,13 +298,16 @@ namespace hal
 
         m_timer->stop();
 
-        // CHECK DIRTY AND TRIGGER SAVE ROUTINE
-
         m_file_watcher->removePath(m_file_name);
         m_file_name = "";
         m_file_open = false;
 
         remove_shadow_file();
+
+        g_netlist_owner.reset();
+        g_netlist = nullptr;
+
+        g_netlist_relay->debug_handle_file_closed();
 
         Q_EMIT file_closed();
     }

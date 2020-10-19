@@ -69,9 +69,9 @@ namespace hal
         bool is_modifying();
 
     private:
-        ModuleItem* m_top_ModuleItem;
+        ModuleItem* m_top_module_item;
 
-        QMap<u32, ModuleItem*> m_ModuleItems;
+        QMap<u32, ModuleItem*> m_module_items;
 
         bool m_is_modifying;
     };

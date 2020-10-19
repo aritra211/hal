@@ -23,11 +23,10 @@
 
 #pragma once
 
-#include <QGraphicsScene>
+#include "gui/netlist_watcher/netlist_watcher.h"
+
 #include <QObject>
 #include <QStringList>
-
-#include "gui/netlist_watcher/netlist_watcher.h"
 
 namespace hal
 {
@@ -35,58 +34,36 @@ namespace hal
     class ContentWidget;
     class PythonEditor;
     class GraphTabWidget;
-    class vigation_widget;
     class ContextManagerWidget;
     class NetlistWatcher;
     class SelectionDetailsWidget;
 
-    class ContentManager : public QObject
+    class ContentManager final : public QObject
     {
         Q_OBJECT
 
     public:
         explicit ContentManager(MainWindow* parent);
-
         ~ContentManager();
 
         PythonEditor* get_python_editor_widget();
-
         GraphTabWidget* get_graph_tab_widget();
-
         ContextManagerWidget* get_context_manager_widget();
+        SelectionDetailsWidget* get_selection_details_widget();
 
-        SelectionDetailsWidget* getSelectionDetailsWidget();
-
-        void hack_delete_content();
-
-    Q_SIGNALS:
-        void save_triggered();
+        void close_content();
 
     public Q_SLOTS:
-
         void handle_open_document(const QString& file_name);
 
-        void handle_close_document();
-
-        void handle_filsystem_doc_changed(const QString& file_name);
-
-        void handle_save_triggered();
-
     private:
-        MainWindow* m_MainWindow;
-
-        QString m_window_title;
+        MainWindow* m_main_window;
 
         QList<ContentWidget*> m_content;
-
-        NetlistWatcher* m_NetlistWatcher;
-
+        NetlistWatcher* m_netlist_watcher;
         PythonEditor* m_python_widget;
-
         GraphTabWidget* m_graph_tab_wid;
-
         ContextManagerWidget* m_context_manager_wid;
-
-        SelectionDetailsWidget* mSelectionDetailsWidget;
+        SelectionDetailsWidget* m_selection_details_widget;
     };
 }

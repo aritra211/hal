@@ -38,9 +38,12 @@ namespace hal
             }
         }
 
-        static_cast<ModuleItem*>(sourceModel()->index(sourceRow, 0, sourceParent).internalPointer())->set_highlighted(false);
+        void* internal = sourceModel()->index(sourceRow, 0, sourceParent).internalPointer();
+
+        if (internal)
+            static_cast<ModuleItem*>(internal)->set_highlighted(false);
+
         return true;
-        //return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
     }
 
     bool ModuleProxyModel::lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const
