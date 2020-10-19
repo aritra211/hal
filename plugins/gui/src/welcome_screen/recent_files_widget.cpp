@@ -4,15 +4,13 @@
 #include "gui/gui_globals.h"
 #include "gui/welcome_screen/recent_file_item.h"
 
+#include <QDir>
+#include <QFileDialog>
+#include <QFileInfo>
 #include <QList>
 #include <QSettings>
 #include <QStyle>
 #include <QVBoxLayout>
-
-#include <QDebug>
-#include <QDir>
-#include <QFileDialog>
-#include <QFileInfo>
 
 namespace hal
 {
@@ -26,7 +24,6 @@ namespace hal
         setLayout(m_layout);
         m_layout->setAlignment(Qt::AlignTop);
 
-        //write_settings();
         read_settings();
     }
 
@@ -49,28 +46,35 @@ namespace hal
     void RecentFilesWidget::handle_file_opened(const QString& file_name)
     {
         Q_UNUSED(file_name)
-        for (const auto item : m_items)
-            item->deleteLater();
 
-        m_items.clear();
+        for (const RecentFileItem* item : m_items)
+        {
+            if (item->file() == file_name)
+                return; // DEBUG
+        }
 
-        // FIX !!!!!!!!!!!!!!!!
+        RecentFileItem* item = new RecentFileItem(file_name);
 
-        //    for (const QString& file : recent_files)
-        //    {
-        //        RecentFileItem* item = new RecentFileItem(file, this);
-        //        m_items.append(item);
-        //        m_layout->addWidget(item);
-        //    }
+        m_items.prepend(item);
+        m_layout->insertWidget(0, item);
+
+        if (m_items.size() > 14)
+        {
+            // HACKY, FIX
+            RecentFileItem* last_item = m_items.last();
+            m_items.removeLast();
+            m_layout->removeWidget(last_item);
+        }
+
+        update_settings();
     }
 
-    void RecentFilesWidget::handle_remove_requested(RecentFileItem *item)
+    void RecentFilesWidget::handle_remove_requested(RecentFileItem* item)
     {
         m_layout->removeWidget(item);
         m_items.removeOne(item);
-        //need to delete item, otherwise the item is buggy and will drawn halfway in the widget
-        //delete item;
-        item->deleteLater();
+
+        delete item;
 
         update_settings();
     }
