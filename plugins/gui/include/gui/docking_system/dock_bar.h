@@ -69,6 +69,8 @@ namespace hal
         ContentWidget* widget_at(int index);
         ContentWidget* next_available_widget(int index);
 
+        void debug_clear();
+
     Q_SIGNALS:
         void stop_animations();
 

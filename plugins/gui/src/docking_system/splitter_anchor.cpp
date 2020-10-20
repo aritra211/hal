@@ -102,6 +102,7 @@ namespace hal
 
     void SplitterAnchor::clear()
     {
+        /*
         for (int i = 0; i < m_dock_bar->count(); ++i)
         {
             ContentWidget* widget = m_dock_bar->widget_at(0);
@@ -109,5 +110,8 @@ namespace hal
         }
 
         m_dock_bar->update();
+        */
+
+        m_dock_bar->debug_clear();
     }
 }
