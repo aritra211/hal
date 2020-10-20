@@ -51,8 +51,12 @@ namespace hal
         Q_OBJECT
 
     public:
-        explicit ContentLayoutArea(QWidget* parent = 0);
+        explicit ContentLayoutArea(QWidget* parent = nullptr);
+
         void add_content(ContentWidget* widget, int index, content_anchor anchor);
+        void remove_content(ContentWidget* widget);
+
+        void clear();
 
         void init_splitter_size(const QSize& size);
 

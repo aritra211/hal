@@ -73,7 +73,6 @@ namespace hal
 
     public:
         explicit MainWindow(QWidget* parent = nullptr);
-        void add_content(ContentWidget* widget, int index, content_anchor anchor);
 
         QString hal_icon_path() const;
         QString hal_icon_style() const;
@@ -99,7 +98,6 @@ namespace hal
         QString settings_icon_path() const;
         QString settings_icon_style() const;
 
-
         void set_hal_icon_path(const QString& path);
         void set_hal_icon_style(const QString &style);
 
@@ -123,6 +121,11 @@ namespace hal
 
         void set_settings_icon_path(const QString& path);
         void set_settings_icon_style(const QString& style);
+
+        void add_content(ContentWidget* widget, int index, content_anchor anchor);
+        void remove_content(ContentWidget* widget);
+
+        void clear();
 
     Q_SIGNALS:
         void save_triggered();

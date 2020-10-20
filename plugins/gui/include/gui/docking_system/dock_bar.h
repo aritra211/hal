@@ -42,14 +42,14 @@ namespace hal
     public:
         DockBar(Qt::Orientation orientation, button_orientation b_orientation, QWidget* parent = 0);
 
-        void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
-        void dragEnterEvent(QDragEnterEvent* event) Q_DECL_OVERRIDE;
-        void dragMoveEvent(QDragMoveEvent* event) Q_DECL_OVERRIDE;
-        void dragLeaveEvent(QDragLeaveEvent* event) Q_DECL_OVERRIDE;
-        void dropEvent(QDropEvent* event) Q_DECL_OVERRIDE;
-        bool eventFilter(QObject* watched, QEvent* event) Q_DECL_OVERRIDE;
-        QSize sizeHint() const Q_DECL_OVERRIDE;
-        QSize minimumSizeHint() const Q_DECL_OVERRIDE;
+        void mouseMoveEvent(QMouseEvent* event) override;
+        void dragEnterEvent(QDragEnterEvent* event) override;
+        void dragMoveEvent(QDragMoveEvent* event) override;
+        void dragLeaveEvent(QDragLeaveEvent* event) override;
+        void dropEvent(QDropEvent* event) override;
+        bool eventFilter(QObject* watched, QEvent* event) override;
+        QSize sizeHint() const override;
+        QSize minimumSizeHint() const override;
 
         void set_anchor(ContentAnchor* anchor);
         void set_autohide(bool autohide);

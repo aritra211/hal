@@ -32,6 +32,7 @@ namespace hal
 {
     class MainWindow;
     class ContentWidget;
+    class PythonConsoleWidget;
     class PythonEditor;
     class GraphTabWidget;
     class ContextManagerWidget;
@@ -59,9 +60,13 @@ namespace hal
     private:
         MainWindow* m_main_window;
 
-        QList<ContentWidget*> m_content;
         NetlistWatcher* m_netlist_watcher;
+
+        QList<ContentWidget*> m_content;
+
         PythonEditor* m_python_widget;
+
+        PythonConsoleWidget* m_python_console_widget;
         GraphTabWidget* m_graph_tab_wid;
         ContextManagerWidget* m_context_manager_wid;
         SelectionDetailsWidget* m_selection_details_widget;

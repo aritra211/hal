@@ -37,8 +37,8 @@ namespace hal
     public:
         VhdlEditor();
 
-        virtual void setup_toolbar(Toolbar* Toolbar) Q_DECL_OVERRIDE;
-        virtual QList<QShortcut*> create_shortcuts() Q_DECL_OVERRIDE;
+        virtual void setup_toolbar(Toolbar* Toolbar) override;
+        virtual QList<QShortcut*> create_shortcuts() override;
 
     public Q_SLOTS:
         void toggle_searchbar();

@@ -44,6 +44,15 @@ namespace hal
             delete content;
 
         m_content.clear();
+
+        delete m_netlist_watcher;
+
+        //m_python_widget = nullptr; DONT DO THIS PYTHON_WIDGET IS CREATED IN THE CONSTRUCTOR FOR SOME REASON
+
+        m_python_console_widget = nullptr;
+        m_graph_tab_wid = nullptr;
+        m_context_manager_wid = nullptr;
+        m_selection_details_widget = nullptr;
     }
 
     PythonEditor* ContentManager::get_python_editor_widget()
@@ -68,18 +77,24 @@ namespace hal
 
     void ContentManager::handle_open_document(const QString& file_name)
     {
+        Q_UNUSED(file_name)
+
         m_graph_tab_wid = new GraphTabWidget(nullptr);
-        //    VhdlEditor* code_edit = new VhdlEditor();
-        //    m_graph_tab_wid->addTab(code_edit, "Source");
         m_main_window->add_content(m_graph_tab_wid, 2, content_anchor::center);
+
+        m_content.append(m_graph_tab_wid);
 
         ModuleWidget* m = new ModuleWidget();
         m_main_window->add_content(m, 0, content_anchor::left);
         m->open();
 
+        m_content.append(m);
+
         m_context_manager_wid = new ContextManagerWidget(m_graph_tab_wid);
         m_main_window->add_content(m_context_manager_wid, 1, content_anchor::left);
         m_context_manager_wid->open();
+
+        m_content.append(m_context_manager_wid);
 
         //we should probably document somewhere why we need this timer and why we have some sort of racing condition(?) here?
         //QTimer::singleShot(50, [this]() { this->m_context_manager_wid->handle_create_context_clicked(); });
@@ -108,48 +123,24 @@ namespace hal
         m_selection_details_widget->open();
         logger_widget->open();
 
-        //m_content.append(code_edit);
-        //m_content.append(navigation);
         m_content.append(m_selection_details_widget);
         m_content.append(logger_widget);
 
-        //-------------------------Test Buttons---------------------------
-
-        /*
-        ContentWidget* blue = new ContentWidget("blue");
-        blue->setObjectName("blue");
-        blue->setStyleSheet("* {background-color: #2B3856;}");
-        ContentWidget* venomgreen = new ContentWidget("venomgreen");
-        venomgreen->setObjectName("venomgreen");
-        venomgreen->setStyleSheet("* {background-color: #728C00;}");
-        ContentWidget* jade = new ContentWidget("jade");
-        jade->setObjectName("jade";
-        jade->setStyleSheet("* {background-color: #C3FDB8;}");
-*/
-
-        //    m_MainWindow->add_content(blue, content_anchor::left);
-        //    m_MainWindow->add_content(venomgreen, content_anchor::left);
-        //    m_MainWindow->add_content(jade, content_anchor::left);
-
-        //    hal_netlistics_view *view = new hal_netlistics_view();
-        //    view->setScene(graph_scene);
-        //    view->setDragMode(QGraphicsView::ScrollHandDrag);
-        //    view->show();
-
-        PluginModel* model                  = new PluginModel(this);
+        PluginModel* model                 = new PluginModel(this);
         PluginManagerWidget* plugin_widget = new PluginManagerWidget();
         plugin_widget->set_plugin_model(model);
-
-        //    m_MainWindow->add_content(plugin_widget, content_anchor::bottom);
+        //m_MainWindow->add_content(plugin_widget, content_anchor::bottom);
 
         connect(model, &PluginModel::run_plugin, m_main_window, &MainWindow::run_plugin_triggered);
 
-        m_main_window->add_content(m_python_widget, 3, content_anchor::right);
-        //m_python_widget->open();
+        m_main_window->add_content(m_python_widget, 0, content_anchor::right);
 
-        PythonConsoleWidget* PythonConsole = new PythonConsoleWidget();
-        m_main_window->add_content(PythonConsole, 5, content_anchor::bottom);
-        PythonConsole->open();
+        m_python_console_widget = new PythonConsoleWidget();
+        m_main_window->add_content(m_python_console_widget, 2, content_anchor::bottom);
+        m_python_console_widget->open();
+
+        m_content.append(m_python_console_widget);
+
         m_netlist_watcher = new NetlistWatcher(this);
     }
 }

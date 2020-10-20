@@ -52,7 +52,7 @@ namespace hal
         SelectionDetailsWidget(QWidget* parent = 0);
         void clear();
 
-        virtual void setup_toolbar(Toolbar* toolbar) Q_DECL_OVERRIDE;
+        virtual void setup_toolbar(Toolbar* toolbar) override;
 
         QString search_icon_path() const;
         QString search_icon_style() const;
@@ -66,7 +66,7 @@ namespace hal
     public Q_SLOTS:
         void handle_selection_update(void* sender);
         void handleTreeSelection(const SelectionTreeItem* sti);
-        QList<QShortcut*> create_shortcuts() Q_DECL_OVERRIDE;
+        QList<QShortcut*> create_shortcuts() override;
 
 
     private Q_SLOTS:

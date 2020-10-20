@@ -100,11 +100,11 @@ namespace hal
         return m_dock_bar->count();
     }
 
-    void SplitterAnchor::remove_content()
+    void SplitterAnchor::clear()
     {
-        for (int i = m_dock_bar->count() - 1; i >= 0; i--)
+        for (int i = 0; i < m_dock_bar->count(); ++i)
         {
-            ContentWidget* widget = m_dock_bar->widget_at(i);
+            ContentWidget* widget = m_dock_bar->widget_at(0);
             remove(widget);
         }
 

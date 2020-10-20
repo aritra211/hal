@@ -43,7 +43,7 @@ namespace hal
         void handle_filter_text_changed(const QString& filter_text);
  
     protected:
-        virtual void currentChanged(const QModelIndex& current, const QModelIndex& previous) Q_DECL_OVERRIDE;
+        virtual void currentChanged(const QModelIndex& current, const QModelIndex& previous) override;
 
     public:
         SelectionTreeView(QWidget* parent = nullptr);

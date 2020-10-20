@@ -390,6 +390,21 @@ namespace hal
         m_settings_icon_style = style;
     }
 
+    void MainWindow::add_content(ContentWidget* widget, int index, content_anchor anchor)
+    {
+        m_layout_area->add_content(widget, index, anchor);
+    }
+
+    void MainWindow::remove_content(ContentWidget* widget)
+    {
+        // NOTHING TO SEE HERE...
+    }
+
+    void MainWindow::clear()
+    {
+        m_layout_area->clear();
+    }
+
     extern void run_main(const QString file_name, const QList<QString> plugins);
 
     void MainWindow::run_plugin_triggered(const QString& name)
@@ -617,6 +632,8 @@ namespace hal
                 return false;
         }
 
+        clear();
+
         g_content_manager->close_content();
         FileManager::get_instance()->close_file();
 
@@ -642,10 +659,5 @@ namespace hal
         g_settings_manager->update("MainWindow/position", pos());
         g_settings_manager->update("MainWindow/size", size());
         g_settings_manager->sync();
-    }
-
-    void MainWindow::add_content(ContentWidget* widget, int index, content_anchor anchor)
-    {
-        m_layout_area->add_content(widget, index, anchor);
     }
 }    // namespace hal

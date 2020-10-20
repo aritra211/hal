@@ -173,12 +173,11 @@ namespace hal
         }
     }
 
-    //does not delete the widgets, just removes
-    void TabWidget::remove_content()
+    void TabWidget::clear()
     {
-        for (int i = m_dock_bar->count() - 1; i >= 0; i--)
+        for (int i = 0; i < m_dock_bar->count(); ++i)
         {
-            ContentWidget* widget = m_dock_bar->widget_at(i);
+            ContentWidget* widget = m_dock_bar->widget_at(0);
             remove(widget);
         }
 

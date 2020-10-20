@@ -38,7 +38,7 @@ namespace hal
         void set_minimap_scrollbar(MinimapScrollbar* scrollbar);
 
     protected:
-        virtual void sliderChange(SliderChange change) Q_DECL_OVERRIDE;
+        virtual void sliderChange(SliderChange change) override;
 
     private:
         MinimapScrollbar* m_minimap_scrollbar;

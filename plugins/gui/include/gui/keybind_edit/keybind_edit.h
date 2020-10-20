@@ -45,7 +45,7 @@ namespace hal
         void edit_rejected();
 
     protected:
-        bool event(QEvent* e) Q_DECL_OVERRIDE;
+        bool event(QEvent* e) override;
 
     private:
         StackedValidator m_validator;

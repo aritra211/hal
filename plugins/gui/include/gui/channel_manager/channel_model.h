@@ -46,12 +46,12 @@ namespace hal
         static ChannelModel* get_instance();
         ~ChannelModel();
 
-        QVariant data(const QModelIndex& index, int role) const Q_DECL_OVERRIDE;
-        Qt::ItemFlags flags(const QModelIndex& index) const Q_DECL_OVERRIDE;
-        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
-        QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
-        int rowCount(const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
-        int columnCount(const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
+        QVariant data(const QModelIndex& index, int role) const override;
+        Qt::ItemFlags flags(const QModelIndex& index) const override;
+        QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+        QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+        int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+        int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
         ChannelItem* add_channel(const QString name);
         void handle_logmanager_callback(const spdlog::level::level_enum& t, const std::string& channel_name, const std::string& msg_text);

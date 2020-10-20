@@ -121,6 +121,19 @@ namespace hal
         }
     }
 
+    void ContentLayoutArea::remove_content(ContentWidget* widget)
+    {
+        // NOTHING TO SEE HERE...
+    }
+
+    void ContentLayoutArea::clear()
+    {
+        m_tab_widget->clear();
+        m_left_anchor->clear();
+        m_right_anchor->clear();
+        m_bottom_anchor->clear();
+    }
+
     void ContentLayoutArea::init_splitter_size(const QSize& size)
     {
         int height = size.height() - 240;

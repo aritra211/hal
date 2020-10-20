@@ -40,7 +40,7 @@ namespace hal
         Q_OBJECT
 
     public:
-        SplitterAnchor(DockBar* DockBar, Splitter* Splitter, QObject* parent = 0);
+        SplitterAnchor(DockBar* DockBar, Splitter* Splitter, QObject* parent = nullptr);
 
         virtual void add(ContentWidget* widget, int index = -1) override;
         virtual void remove(ContentWidget* widget) override;
@@ -50,7 +50,7 @@ namespace hal
         virtual void close(ContentWidget* widget) override;
 
         int count();
-        void remove_content();
+        void clear();
 
     Q_SIGNALS:
         void content_changed();

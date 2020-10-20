@@ -53,7 +53,7 @@ namespace hal
         ModuleDetailsWidget(QWidget* parent = nullptr);
         ~ModuleDetailsWidget();
 
-        virtual bool eventFilter(QObject* watched, QEvent* event) Q_DECL_OVERRIDE;
+        virtual bool eventFilter(QObject* watched, QEvent* event) override;
 
         void update(const u32 module_id);
 

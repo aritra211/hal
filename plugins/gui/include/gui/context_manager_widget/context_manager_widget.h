@@ -65,7 +65,7 @@ namespace hal
 
         void select_view_context(GraphContext* context);
 
-        virtual void setup_toolbar(Toolbar* toolbar) Q_DECL_OVERRIDE;
+        virtual void setup_toolbar(Toolbar* toolbar) override;
 
         QString new_view_icon_path() const;
         QString new_view_icon_style() const;

@@ -67,12 +67,12 @@ namespace hal
         explicit PythonEditor(QWidget* parent = nullptr);
         ~PythonEditor();
 
-        virtual void setup_toolbar(Toolbar* Toolbar) Q_DECL_OVERRIDE;
-        virtual QList<QShortcut*> create_shortcuts() Q_DECL_OVERRIDE;
+        virtual void setup_toolbar(Toolbar* Toolbar) override;
+        virtual QList<QShortcut*> create_shortcuts() override;
 
-        virtual void handle_stdout(const QString& output) Q_DECL_OVERRIDE;
-        virtual void handle_error(const QString& output) Q_DECL_OVERRIDE;
-        virtual void clear() Q_DECL_OVERRIDE;
+        virtual void handle_stdout(const QString& output) override;
+        virtual void handle_error(const QString& output) override;
+        virtual void clear() override;
 
         void handle_action_open_file();
         void handle_action_save_file();
@@ -152,7 +152,7 @@ namespace hal
         void handle_base_file_modified_ok();
 
     protected:
-        bool eventFilter(QObject* obj, QEvent* event) Q_DECL_OVERRIDE;
+        bool eventFilter(QObject* obj, QEvent* event) override;
 
     private:
         QVBoxLayout* m_layout;
