@@ -52,6 +52,8 @@ namespace hal
 
         void update(QVector<GraphContext*>* pointer);
 
+        void clear();
+
     private:
         QVector<GraphContext*>* m_context_list;
     };

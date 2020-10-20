@@ -632,6 +632,8 @@ namespace hal
                 return false;
         }
 
+        g_graph_context_manager->clear();
+
         clear();
 
         g_content_manager->close_content();

@@ -291,4 +291,14 @@ namespace hal
     {
         return m_context_table_model;
     }
+
+    void GraphContextManager::clear()
+    {
+        for (GraphContext* context : m_graph_contexts)
+            delete context;
+
+        m_graph_contexts.clear();
+
+        m_context_table_model->clear();
+    }
 }

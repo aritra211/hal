@@ -109,6 +109,15 @@ namespace hal
         m_context_list = pointer;
     }
 
+    void ContextTableModel::clear()
+    {
+        beginResetModel();
+
+        m_context_list->clear();
+
+        endResetModel();
+    }
+
     GraphContext* ContextTableModel::get_context(const QModelIndex& index) const
     {
         return (*m_context_list)[index.row()];

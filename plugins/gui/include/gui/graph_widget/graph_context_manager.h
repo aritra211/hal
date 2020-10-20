@@ -86,6 +86,8 @@ namespace hal
 
         ContextTableModel* get_context_table_model() const;
 
+        void clear();
+
     Q_SIGNALS:
         void context_created(GraphContext* context);
         void context_renamed(GraphContext* context);
