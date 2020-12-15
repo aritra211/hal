@@ -52,7 +52,7 @@ for a_val in range(0,2):
 
 
 
-pl.find_configuration(netlist, netlist.get_gates(), inputs, outputs, assignments)
+pl.find_configuration(netlist, netlist.get_gates(), inputs, outputs, key_inputs, assignments)
 #pl.execute(netlist)
 
 #unload everything hal related
