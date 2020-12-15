@@ -103,7 +103,8 @@ namespace hal
         {
         }
 
-        
+        /*
+
         while (true)
         {
             auto result = s.check();
@@ -136,7 +137,8 @@ namespace hal
         }
 
         return successor_transitions;
-        * / return std::map<u32, u32>();
+        */
+        return std::map<u32, u32>();
     }
 
 }    // namespace hal
