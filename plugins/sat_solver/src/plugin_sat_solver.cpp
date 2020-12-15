@@ -61,6 +61,7 @@ namespace hal
             std::cout << z3_bf << std::endl;
         }
 
+
         log_info("sat_solver", "building input to output assignments now");
         std::map<std::map<z3::expr, u32>, std::map<z3::expr, u32>> input_to_output_assignments;
         for (const auto& assignment : assignments)
@@ -90,20 +91,20 @@ namespace hal
         }
         log_info("sat_solver", "starting sat solver");
 
+
         solve(ctx, input_to_output_assignments);
+
 
         return std::vector<std::map<Net*, u32>>();
     }
 
     std::map<u32, u32> SATSolver::solve(z3::context ctx, std::map<std::map<z3::expr, u32>, std::map<z3::expr, u32>> input_to_output_assignments)
     {
-        z3::solver s(ctx);
-
-        for (const auto& [input, output] : input_to_output_assignments)
-        {
-        }
-
         /*
+        std::vector<FsmTransition> successor_transitions;
+
+        auto s = z3::solver(prev_state_vec.ctx());
+        s.add(prev_state_vec == start_state);
 
         while (true)
         {
