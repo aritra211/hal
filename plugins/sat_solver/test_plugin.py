@@ -6,6 +6,7 @@ sys.path.append("/Users/eve/Uni/Projekte/hal/build/lib/") #this is where your ha
 os.environ["HAL_BASE_PATH"] = "/Users/eve/Uni/Projekte/hal/build/" # hal base path
 import hal_py
 
+#netlist_to_read = "/Users/eve/Uni/Lehre/hwre-wise2021/02_Projekte/P3/Learning by doing/fulladder_16_bit.v"
 netlist_to_read = "/Users/eve/Uni/Lehre/hwre-wise2021/02_Projekte/P3/Learning by doing/fulladder_obfuscated_netlist.v"
 gate_library_path = "/Users/eve/Uni/Lehre/hwre-wise2021/02_Projekte/P3/Learning by doing/simpler.lib"
 
@@ -22,8 +23,16 @@ pl = hal_py.plugin_manager.get_plugin_instance("sat_solver")
 assignments = list()
 
 inputs = [netlist.get_net_by_id(7), netlist.get_net_by_id(9), netlist.get_net_by_id(8)]
+#inputs = [netlist.get_net_by_id(19), netlist.get_net_by_id(20), netlist.get_net_by_id(21)]
+
 outputs = [netlist.get_net_by_id(31), netlist.get_net_by_id(32)]
+#outputs = [netlist.get_net_by_id(22), netlist.get_net_by_id(23)]
+
 key_inputs = [netlist.get_net_by_id(3), netlist.get_net_by_id(4), netlist.get_net_by_id(5), netlist.get_net_by_id(6)]
+#key_inputs = [  netlist.get_net_by_id(3),   netlist.get_net_by_id(4),   netlist.get_net_by_id(11),  netlist.get_net_by_id(12), 
+#                netlist.get_net_by_id(13),  netlist.get_net_by_id(14),  netlist.get_net_by_id(15),  netlist.get_net_by_id(16),
+#                netlist.get_net_by_id(17),  netlist.get_net_by_id(18),  netlist.get_net_by_id(5),   netlist.get_net_by_id(6),
+#                netlist.get_net_by_id(7),   netlist.get_net_by_id(8),   netlist.get_net_by_id(9),   netlist.get_net_by_id(10)]
 
 cin = netlist.get_net_by_id(7)
 a = netlist.get_net_by_id(9)
@@ -52,7 +61,7 @@ for a_val in range(0,2):
 
 
 
-pl.find_configuration(netlist, netlist.get_gates(), inputs, outputs, key_inputs, assignments)
+pl.find_key_configuration(netlist, netlist.get_gates(), inputs, outputs, key_inputs, assignments)
 #pl.execute(netlist)
 
 #unload everything hal related

@@ -31,7 +31,7 @@ namespace hal
             .def("get_name", &SATSolver::get_name)
             .def_property_readonly("version", &SATSolver::get_version)
             .def("get_version", &SATSolver::get_version)
-            .def("find_configuration", &SATSolver::find_configuration);
+            .def("find_key_configuration", &SATSolver::find_key_configuration);
 
 #ifndef PYBIND11_MODULE
         return m.ptr();

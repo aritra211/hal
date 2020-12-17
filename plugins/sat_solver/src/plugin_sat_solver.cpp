@@ -39,12 +39,12 @@ namespace hal
     {
     }
 
-    std::vector<std::map<Net*, u32>> SATSolver::find_configuration(Netlist* nl,
-                                                                   const std::vector<Gate*> subgraph,
-                                                                   std::vector<Net*> input_nets,
-                                                                   std::vector<Net*> output_nets,
-                                                                   std::vector<Net*> key_bits,
-                                                                   const std::vector<std::map<Net*, u32>> assignments)
+    std::vector<std::map<Net*, u32>> SATSolver::find_key_configuration(Netlist* nl,
+                                                                       const std::vector<Gate*> subgraph,
+                                                                       std::vector<Net*> input_nets,
+                                                                       std::vector<Net*> output_nets,
+                                                                       std::vector<Net*> key_bits,
+                                                                       const std::vector<std::map<Net*, u32>> assignments)
     {
         log_info("sat_solver", "starting to look for configurations...");
 
@@ -77,13 +77,13 @@ namespace hal
             {
                 if (std::find(input_nets.begin(), input_nets.end(), net) != input_nets.end())
                 {
-                    z3::expr input           = ctx.bv_const(std::to_string(net->get_id()).c_str(), 1);
-                    input_assignments[input] = value;
+                    z3::expr input = ctx.bv_const(std::to_string(net->get_id()).c_str(), 1);
+                    input_assignments.insert(std::make_pair(input, value));
                 }
                 else if (std::find(output_nets.begin(), output_nets.end(), net) != output_nets.end())
                 {
-                    z3::expr output            = ctx.bv_const(std::to_string(net->get_id()).c_str(), 1);
-                    output_assignments[output] = value;
+                    z3::expr output = ctx.bv_const(std::to_string(net->get_id()).c_str(), 1);
+                    output_assignments.insert(std::make_pair(output, value));
                 }
                 else
                 {
@@ -91,19 +91,18 @@ namespace hal
                     return std::vector<std::map<Net*, u32>>();
                 }
             }
-            input_to_output_assignments[input_assignments] = output_assignments;
+            input_to_output_assignments.insert(std::make_pair(input_assignments, output_assignments));
         }
         log_info("sat_solver", "starting sat solver");
 
-        solve(&ctx, key_bits, output_net_to_z3_expr, input_to_output_assignments);
-
-        return std::vector<std::map<Net*, u32>>();
+        return solve(&ctx, key_bits, output_net_to_z3_expr, input_to_output_assignments);
+        ;
     }
 
-    std::map<u32, u32> SATSolver::solve(z3::context* ctx,
-                                        std::vector<Net*> key_bits,
-                                        std::map<u32, z3::expr> output_net_to_z3_bf,
-                                        std::map<std::map<z3::expr, u32>, std::map<z3::expr, u32>> input_to_output_assignments)
+    std::vector<std::map<Net*, u32>> SATSolver::solve(z3::context* ctx,
+                                                      std::vector<Net*> key_bits,
+                                                      std::map<u32, z3::expr> output_net_to_z3_bf,
+                                                      std::map<std::map<z3::expr, u32>, std::map<z3::expr, u32>> input_to_output_assignments)
     {
         z3::solver s(*ctx);
         for (const auto& [net_id, z3_bf] : output_net_to_z3_bf)
@@ -111,7 +110,13 @@ namespace hal
             s.add(z3_bf == ctx->bv_const(std::to_string(net_id).c_str(), 1));
         }
 
-        std::cout << s << std::endl;
+        z3::expr_vector in_expr_vec(*ctx);
+        for (const auto& [z3_var, _] : input_to_output_assignments.begin()->first)
+        {
+            in_expr_vec.push_back(z3_var);
+        }
+
+        z3::expr conditions = ctx->bool_val(1);
 
         for (const auto& [in_assign, out_assign] : input_to_output_assignments)
         {
@@ -126,21 +131,21 @@ namespace hal
             for (const auto& [z3_var, value] : out_assign)
             {
                 z3::expr temp    = (z3_var == ctx->bv_val(value, 1));
-                assign_output_z3 = assign_output_z3 & temp;
+                assign_output_z3 = assign_output_z3 && temp;
             }
 
             z3::expr assign_z3(*ctx);
             assign_z3 = implies(assign_input_z3, assign_output_z3);
 
-            s.add(assign_z3);
-
-            std::cout << assign_z3 << std::endl;
+            conditions = conditions && assign_z3;
         }
+
+        s.add(conditions);
+
         auto result = s.check();
 
         // add found solution to constrains, so we can make sure, that we found every possible key
-
-        std::vector<std::map<u32, u32>> possible_values;
+        std::vector<std::map<Net*, u32>> possible_values;
         while (true)
         {
             auto result = s.check();
@@ -148,56 +153,32 @@ namespace hal
             if (result == z3::sat)
             {
                 auto m = s.get_model();
-                std::cout << "model: " << m << std::endl;
 
-                z3::expr to_add = ctx->bool_val(0);
+                std::map<Net*, u32> possible_value;
+                z3::expr to_add = ctx->bool_val(1);
+                
                 for (const auto& key_bit : key_bits)
                 {
                     z3::expr key_bit_z3 = ctx->bv_const(std::to_string(key_bit->get_id()).c_str(), 1);
-                    z3::expr temp = (key_bit_z3 != m.eval(key_bit_z3));
-                    to_add        = to_add || temp;
-                }
-                s.add(to_add == ctx->bool_val(0));
-                std::cout << "added: " << to_add << std::endl;
 
-                std::cout << "solver: " << s << std::endl;
+                    z3::expr temp       = (key_bit_z3 != m.eval(key_bit_z3));
+                    to_add              = to_add && temp;
 
-            }
-            else
-            {
-                break;
-            }
-        }
-        /*
-        std::vector<FsmTransition> successor_transitions;
-
-        auto s = z3::solver(prev_state_vec.ctx());
-        s.add(prev_state_vec == start_state);
-
-        while (true)
-        {
-            auto result = s.check();
-
-            if (result == z3::sat)
-            {
-                auto m = s.get_model();
-                auto n = m.eval(next_state_vec);
-
-                // check wether the next state only depends on the prev state (is numeral) or contains external inputs
-                if (n.is_numeral())
-                {
-                    successor_transitions.push_back({start_state, n, {}});
-                }
-                else
-                {
-                    auto relevant_inputs = get_relevant_external_inputs(n, external_ids_to_expr);
-                    for (u64 i = 0; i < pow(2, relevant_inputs.size()); i++)
+                    if (m.eval(key_bit_z3).id() == ctx->bv_val(0, 1).id())
                     {
-                        auto transition = generate_transition_with_inputs(start_state, n, relevant_inputs, i);
-                        successor_transitions.push_back(transition);
+                        possible_value.insert(std::make_pair(key_bit, 0));
+                    }
+                    else
+                    {
+                        possible_value.insert(std::make_pair(key_bit, 1));
                     }
                 }
-                s.add(next_state_vec != n);
+                s.add(to_add);
+
+                std::cout << to_add << std::endl;
+
+                possible_values.push_back(possible_value);
+                break;
             }
             else
             {
@@ -205,9 +186,8 @@ namespace hal
             }
         }
 
-        return successor_transitions;
-        */
-        return std::map<u32, u32>();
+        log_info("sat_solver", "found {} possible key(s)", possible_values.size());
+        return possible_values;
     }
 
 }    // namespace hal
